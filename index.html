@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Learn Arduino — 交互式 3D 电路课</title>
+<meta name="description" content="在 3D 面包板上一步步接线，运行真实 Arduino 代码，看着元件工作。11 节免费入门课，从点亮第一颗 LED 到停车场距离提示器。" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff4b3e'/%3E%3Cpath d='M16 7l8 18h-4.6l-1.3-3.2h-4.2L12.6 25H8L16 7zm0 6.4l-1.4 3.6h2.8L16 13.4z' fill='%23fff'/%3E%3C/svg%3E" />
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ───────── 顶栏 ───────── -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+          <path d="M16 5l9 20h-5.2l-1.5-3.6h-4.6L12.2 25H7L16 5zm0 7.6l-1.6 4.1h3.2L16 12.6z" fill="currentColor"/>
+          <rect x="3" y="3" width="26" height="26" rx="6" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="1.4"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <h1>Learn <span>Arduino</span></h1>
+        <p>交互式 3D 电路课 · 零硬件上手</p>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress"><i id="progressBar" style="width:0%"></i></div>
+      <span id="progressText">0 / 11 已完成</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="ghost" id="btnViewTop" title="俯视视角 (T)">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 12l9-8 9 8M7 12v7h10v-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        俯视
+      </button>
+      <button class="ghost" id="btnViewReset" title="复位视角 (R)">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 10a8 8 0 1 1 2.4 5.7M4 4v6h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        复位
+      </button>
+      <button class="ghost icon-only" id="btnSidebar" title="课程目录">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────── 主体 ───────── -->
+  <main class="layout">
+
+    <!-- 左：课程目录 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <span>课程目录</span>
+        <em id="lessonCount">11 节</em>
+      </div>
+      <ol class="lesson-list" id="lessonList"></ol>
+      <div class="sidebar-foot">
+        <div class="tip">
+          <span class="dot"></span>
+          <div>
+            <strong>全部免费 · 无需注册</strong>
+            <p>课程中的代码可直接烧录到真实的 Uno 上。</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 中：3D 舞台 -->
+    <section class="stage" id="stage">
+      <canvas id="scene"></canvas>
+
+      <div class="stage-title">
+        <span class="badge" id="stageBadge">第 1 课</span>
+        <h2 id="stageTitle">点亮第一颗 LED</h2>
+        <p id="stageSub">Blink —— 每个 Arduino 人的第一行代码</p>
+      </div>
+
+      <div class="stage-tools">
+        <button data-view="iso" class="tool active" title="斜视角">斜视</button>
+        <button data-view="top" class="tool" title="俯视">俯视</button>
+        <button data-view="close" class="tool" title="特写">特写</button>
+        <span class="divider"></span>
+        <button id="btnWireAll" class="tool" title="一键接好全部导线">一键接线</button>
+      </div>
+
+      <div class="stage-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
+
+      <div class="stage-hintbar" id="stepHint">
+        <span class="stepbadge">1 / 4</span>
+        <span class="steptext">把 LED 的长脚（正极）插进 <b>b8</b>，短脚插进 <b>b9</b></span>
+        <button class="nextbtn" id="btnNextStep">下一步 →</button>
+      </div>
+
+      <div class="loading" id="loading"><span></span>正在搭建工作台…</div>
+    </section>
+
+    <!-- 右：面板 -->
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="wire" role="tab">
+          <svg viewBox="0 0 24 24" width="15" height="15"><path d="M5 19c6 0 4-14 14-14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="5" cy="19" r="2.2" fill="currentColor"/><circle cx="19" cy="5" r="2.2" fill="currentColor"/></svg>
+          接线
+        </button>
+        <button class="tab" data-tab="code" role="tab">
+          <svg viewBox="0 0 24 24" width="15" height="15"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          代码
+        </button>
+        <button class="tab" data-tab="serial" role="tab">
+          <svg viewBox="0 0 24 24" width="15" height="15"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 9l3 3-3 3M13 15h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          串口监视器
+          <i class="ping" id="serialPing"></i>
+        </button>
+      </div>
+
+      <div class="tab-body">
+
+        <!-- 接线 -->
+        <div class="pane active" id="pane-wire">
+          <div class="pane-head">
+            <h3>接线步骤</h3>
+            <p>按顺序把元件插到面包板上，点任意一步可以直接跳转。</p>
+          </div>
+          <ol class="steps" id="stepList"></ol>
+          <div class="parts">
+            <h4>元件清单</h4>
+            <ul id="partList"></ul>
+          </div>
+        </div>
+
+        <!-- 代码 -->
+        <div class="pane" id="pane-code">
+          <div class="pane-head row">
+            <div>
+              <h3 id="codeFile">blink.ino</h3>
+              <p>代码只读。改下面的参数，看电路怎么反应。</p>
+            </div>
+            <button class="copybtn" id="btnCopy">复制</button>
+          </div>
+          <div class="code" id="codeBox"></div>
+          <div class="params" id="paramBox"></div>
+        </div>
+
+        <!-- 串口 -->
+        <div class="pane" id="pane-serial">
+          <div class="pane-head row">
+            <div>
+              <h3>串口监视器</h3>
+              <p>运行代码后，Arduino 通过 USB 打印的内容。</p>
+            </div>
+            <button class="copybtn" id="btnClearSerial">清空</button>
+          </div>
+          <div class="serial" id="serialBox">
+            <div class="serial-head">波特率 9600 · COM3</div>
+            <div class="serial-lines" id="serialLines"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel-foot">
+        <button class="runbtn" id="btnRun">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path id="runIcon" d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
+          <span id="runLabel">运行代码</span>
+        </button>
+        <button class="stopbtn" id="btnStop" title="停止">
+          <svg viewBox="0 0 24 24" width="14" height="14"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>
+        </button>
+        <div class="clock"><span id="clock">00:00</span><em>运行时间</em></div>
+        <button class="markbtn" id="btnDone" title="标记为已完成">✓ 完成本课</button>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<button class="scrim" id="scrim"></button>
+
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
