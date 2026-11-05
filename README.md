@@ -8,6 +8,28 @@
 
 ---
 
+## 效果预览
+
+以下都是站点实际运行时的整页截图（含 WebGL 3D 画面），不是示意图。
+
+**第 11 课「停车场距离提示器」**——8 个元件、12 根导线全部接好，右侧是只读代码与随运行实时高亮的当前行。
+
+![结课项目：全接线状态与代码高亮](docs/01-parking.png)
+
+**第 4 课「电位器调光」**——代码页和可调参数。改滑条等于改代码里的常量，3D 里的 LED 亮度会跟着变。
+
+![代码页与参数滑条](docs/02-code.png)
+
+**第 9 课「超声波测距」**——串口监视器正在打印距离读数，模拟 `Serial.print(cm)` 的输出。
+
+![串口监视器输出](docs/03-serial.png)
+
+**窄屏布局**（402×939）——三栏自动切换为上下堆叠，课程目录收进抽屉。
+
+![移动端堆叠布局](docs/04-mobile.png)
+
+---
+
 ## 快速开始
 
 因为用了 ES Module 和 `importmap`，**必须通过 http 协议访问**。直接双击 `index.html` 会因 `file://` 下的 CORS 限制白屏。
@@ -108,7 +130,9 @@ php -S localhost:8823
 ```
 learn-arduino/
 ├── index.html            185 行   页面骨架 + importmap
+├── README.md                      本文档
 ├── css/style.css         517 行   深色主题、三栏栅格、响应式断点
+├── docs/                          4 张运行截图（见「效果预览」）
 ├── js/
 │   ├── geo.js             94 行   统一坐标系与引脚/孔位解析
 │   ├── boards.js         405 行   桌面、面包板、Arduino Uno 建模
@@ -184,6 +208,7 @@ sim(t, p) {                    // t = 运行秒数，p = 参数对象
 - 蜂鸣器：`OscillatorNode` 方波 + `setTargetAtTime` 平滑换频，跟随 `tone()` 的频率。
 - 暗色主题，主色 `#ff4b3e`（Arduino 红），辅助青绿 `#2fd4c6`。
 - 响应式断点：`1360px` 收窄面板、`1180px` 侧栏转抽屉（带遮罩）、`880px` 改为上下堆叠。
+- `window.__app` / `window.__lab` 暴露了 `load` / `setStep` / `run` / `switchTab` / `renderSerial` / `setActiveLine` 等调试接口，可直接驱动界面，便于自动化验证和批量截图。
 
 ---
 

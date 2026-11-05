@@ -476,4 +476,4 @@ requestAnimationFrame(loop);
 setTimeout(() => $('#loading').classList.add('hide'), 420);
 
 // 调试接口（便于自动化检查，也可在控制台里玩）
-window.__app = { load, setStep, run, stop, state, lab, LESSONS };
+window.__app = { load, setStep, run, stop, state, lab, LESSONS, switchTab, renderSerial, setActiveLine };
